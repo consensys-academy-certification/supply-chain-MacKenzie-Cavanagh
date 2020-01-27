@@ -52,43 +52,72 @@ contract SupplyChain {
   }
   // Create a modifier named 'checkCaller' where only the buyer or the seller (depends on the function) of an Item can proceed with the execution.
 
-  modifier checkCaller (address required) {
+  modifier checkCaller (address required, Item xitem, bool adrfunction) {
         require (
-                
+                if adrfunction
+                      xitem.buyer = required;
+                else 
+                      xitem.seller = required;
         );
         _;
   }
   
   // Create a modifier named 'checkValue' where the execution can only proceed if the caller sent enough Ether to pay for a specific Item or fee.
-  modifier checkValue () {
+  modifier checkValue(uint _amount) {
+        require(
+            msg.value >= _amount,
+            "Not enough Ether provided."
+        );
+        _;
+        if (msg.value > _amount)
+            msg.sender.send(msg.value - _amount);
+    }
   
-  
-  }
 
 
   // Create a function named 'addItem' that allows anyone to add a new Item by paying a fee of 1 finney. Any overpayment amount should be returned to the caller. All struct members should be mandatory except the buyer.
-  function addItem () {
-  
+  function addItem (string _name, uint _price, address _seller, address _buyer) public payable {
+          checkValue(1e15);
+          require {
+               name != null;
+               uint != null;
+               seller != null;
+          }
+          
+          new Item item;
+          item.name = _name;
+          item.price = _price;
+          item.state = ForSale;
+          item.seller = _seller;
+          item.buyer = _buyer;
+          
   }
   
   // Create a function named 'buyItem' that allows anyone to buy a specific Item by paying its price. The price amount should be transferred to the seller and any overpayment amount should be returned to the buyer.
-  function buyItem () {
-  
+  function buyItem (Item item) {
+          checkValue(item.price);
+          
+          item.state = Sold;
   }
   // Create a function named 'shipItem' that allows the seller of a specific Item to record that it has been shipped.
-  function shipItem () {
-  
+  function shipItem (Item item) {
+          checkCaller(item.seller, item, true);
+          checkState(item, Sold);
+          item.state = Shipped;
   }
   // Create a function named 'receiveItem' that allows the buyer of a specific Item to record that it has been received.
-  function receiveItem () {
-  
+  function receiveItem (Item item) {
+          checkCaller(item.buyer, item, false);
+          checkState(item, Shipped);
+          item.state = Received;
   }
   // Create a function named 'getItem' that allows anyone to get all the information of a specific Item in the same order of the struct Item. 
-  function getItem () {
-  
+  function getItem (Item item) returns (string memory, uint, State, address, address) {
+          return (item.name, item.price, item.state, item.buyer, item.seller);
   }
   // Create a function named 'withdrawFunds' that allows the contract owner to withdraw all the available funds.
   function withdrawFunds () {
-  
+          onlyOwner();
+          msg.sender.send(this.balance);
   }
 }
