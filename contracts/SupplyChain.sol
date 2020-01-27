@@ -43,18 +43,20 @@ contract SupplyChain {
 
   // Create a modifier named 'checkState' where the execution can only proceed if the respective Item of a given itemId is in a specific state.
 
-  modifier checkState (uint itemID) {
+  modifier checkState (uint itemID, State requiredState) {
+        Item tempitem = items[itemID];
         require(
-              
-        
+              tempitem.state = requiredState;
         );
-  
+        _;
   }
   // Create a modifier named 'checkCaller' where only the buyer or the seller (depends on the function) of an Item can proceed with the execution.
 
-  modifier checkCaller () {
-  
-  
+  modifier checkCaller (address required) {
+        require (
+                
+        );
+        _;
   }
   
   // Create a modifier named 'checkValue' where the execution can only proceed if the caller sent enough Ether to pay for a specific Item or fee.
