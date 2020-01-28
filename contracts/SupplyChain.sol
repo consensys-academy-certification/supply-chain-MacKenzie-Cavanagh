@@ -94,7 +94,7 @@ contract SupplyChain {
   }
   
   // Create a function named 'buyItem' that allows anyone to buy a specific Item by paying its price. The price amount should be transferred to the seller and any overpayment amount should be returned to the buyer.
-  function buyItem (Item item) {
+  function buyItem (Item item) public payable {
           checkValue(item.price);
           
           item.state = Sold;
@@ -112,11 +112,11 @@ contract SupplyChain {
           item.state = Received;
   }
   // Create a function named 'getItem' that allows anyone to get all the information of a specific Item in the same order of the struct Item. 
-  function getItem (Item item) returns (string memory, uint, State, address, address) {
+  function getItem (Item item) public view returns (string memory, uint, State, address, address) {
           return (item.name, item.price, item.state, item.buyer, item.seller);
   }
   // Create a function named 'withdrawFunds' that allows the contract owner to withdraw all the available funds.
-  function withdrawFunds () {
+  function withdrawFunds () public view {
           onlyOwner();
           msg.sender.send(this.balance);
   }
