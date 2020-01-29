@@ -6,8 +6,9 @@ pragma solidity ^0.5.0;
 
 contract SupplyChain {
 
-  constructor() public { owner = msg.sender; }
   address payable owner;
+  constructor() public { owner = msg.sender; }
+  
     
   // Create a variable named 'itemIdCount' to store the number of items and also be used as reference for the next itemId.
   uint itemIdCount;
@@ -28,7 +29,7 @@ contract SupplyChain {
   mapping (uint => Item) items;
 
   // Create an event to log all state changes for each item.
-  event stateChanges (Item, State);
+  event stateChanges (Item item, State state);
 
 
   // Create a modifier named 'onlyOwner' where only the contract owner can proceed with the execution.
@@ -47,7 +48,7 @@ contract SupplyChain {
         Item tempitem = items[itemID];
         require(
               tempitem.state == requiredState, 
-              "Item not in correct state."
+              "Item not in correct state to proceed."
         );
         _;
   }
@@ -88,6 +89,7 @@ contract SupplyChain {
   // Create a function named 'addItem' that allows anyone to add a new Item by paying a fee of 1 finney. Any overpayment amount should be returned to the caller. All struct members should be mandatory except the buyer.
   function addItem (bytes _name, uint _price, address _seller, address _buyer) public payable {
           checkValue(0.001 ether); //1 finney
+
           require (
                _name != null
            );
@@ -113,25 +115,25 @@ contract SupplyChain {
           emit stateChanges(item, Sold);
   }
   // Create a function named 'shipItem' that allows the seller of a specific Item to record that it has been shipped.
-  function shipItem (Item item) public view{
+  function shipItem (Item item) public  {
           checkCaller(item.seller, item, false);
           checkState(item, Sold);
           item.state = Shipped;
           emit stateChanges(item, Shipped);
   }
   // Create a function named 'receiveItem' that allows the buyer of a specific Item to record that it has been received.
-  function receiveItem (Item item) public view {
+  function receiveItem (Item item) public  {
           checkCaller(item.buyer, item, true);
           checkState(item, Shipped);
           item.state = Received;
           emit stateChanges(item, Received);
   }
   // Create a function named 'getItem' that allows anyone to get all the information of a specific Item in the same order of the struct Item. 
-  function getItem (Item item) public view returns (bytes, uint, State, address, address) {
+  function getItem (Item item) private pure returns (bytes, uint, State, address, address) {
           return (item.name, item.price, item.state, item.buyer, item.seller);
   }
   // Create a function named 'withdrawFunds' that allows the contract owner to withdraw all the available funds.
-  function withdrawFunds () public view {
+  function withdrawFunds () public payable {
           onlyOwner();
           msg.sender.send(this.balance);
   }
