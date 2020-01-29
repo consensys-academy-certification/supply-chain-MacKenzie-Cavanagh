@@ -129,11 +129,11 @@ contract SupplyChain {
           emit stateChanges(item, Received);
   }
   // Create a function named 'getItem' that allows anyone to get all the information of a specific Item in the same order of the struct Item. 
-  function getItem (Item item) private pure returns (bytes, uint, State, address, address) {
+  function getItem (Item item) private view returns (bytes, uint, State, address, address) {
           return (item.name, item.price, item.state, item.buyer, item.seller);
   }
   // Create a function named 'withdrawFunds' that allows the contract owner to withdraw all the available funds.
-  function withdrawFunds () public payable {
+  function withdrawFunds () public {
           onlyOwner();
           msg.sender.send(this.balance);
   }
